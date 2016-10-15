@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="jquery.min.js" ></script>
+    <script type="text/javascript" src="jquery.json.js"  ></script>
+    <script type="text/javascript" src="niuniucapture.js"  ></script>
+
+</head>
+<script type="text/javascript">
+    var captureObj = null;
+
+    $(function() {
+        debugger;
+        Init();
+        $("#printscreen").click(function() {
+            StartCapture()
+        })
+    });
+
+    function Init() {
+        captureObj = new NiuniuCaptureObject();
+        captureObj.NiuniuAuthKey = '3649088e1dd906e28dc97340ad88c73d';
+        captureObj.TrackColor = rgb2value(255, 0, 0);
+        captureObj.EditBorderColor = rgb2value(0, 0, 255);
+        captureObj.FinishedCallback = OnCaptureFinishedCallback;
+        captureObj.PluginLoadedCallback = PluginLoadedCallback;
+        captureObj.InitNiuniuCapture()
+    }
+    function PluginLoadedCallback(a) {
+        if (a) {}
+    }
+
+    function ShowDownLoad() {
+        if (captureObj.IsNeedCrx()) {
+            ShowIntallDownload("ZBJYCaptureInstallChrome.exe")
+        } else {
+            ShowIntallDownload("ZBJYCaptureInstall.exe")
+        }
+    }
+    function ShowIntallDownload(c) {
+        var a = new Date();
+        var b = contextPath + "/resource/plugin/" + c;
+        if (confirm("请下载并安装截图控件1")) {
+            window.open(b)
+        }
+    }
+    function ReloadPlugin() {
+        if (captureObj.IsNeedCrx()) {
+            if (confirm("首次安装使用截图需要刷新页面?")) {
+                location.reload();
+                return
+            }
+            return
+        }
+        if (!captureObj.pluginValid()) {
+            captureObj.LoadPlugin()
+        }
+        if (!captureObj.pluginValid()) {
+            ShowDownLoad()
+        }
+    }
+    function StartCapture() {
+        var c = Capture();
+        if (!c) {
+            Init();
+            c = Capture()
+        }
+        if (!c) {
+            ShowDownLoad()
+        }
+    }
+    function Capture() {
+        var a = "1.jpg";
+        return captureObj.DoCapture(a, 0, 3, 0, 0, 0, 0)
+    }
+    function OnCaptureFinishedCallback(d, b, h, c, a, f, e, g) {
+        if (d < 0) {
+            ShowDownLoad()
+        } else {
+            if (d == 1) {
+                UploadCaptureData(e, g)
+            }
+        }
+    }
+    function UploadCaptureData(data, f) {
+        var imgType = f.substr(f.lastIndexOf(".") + 1);
+        UploadData(data, imgType)
+    }
+
+    function UploadData(data, imgType) {
+        console.log(imgType);//例如 img
+        console.log(encodeURIComponent(data)); //http://www.vgot.net/test/image2base64.php
+    }
+
+</script>
+<body>
+    <input type="button" name="截图测试" id="printscreen" value="截图测试"/>
+
+</body>
+</html>
